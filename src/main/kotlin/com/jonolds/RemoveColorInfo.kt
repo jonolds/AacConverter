@@ -35,7 +35,7 @@ private fun getMkvPropEditCommandParts(filePath: Path): List<String> {
 
 
 fun removeColorInfo(config: AacConfig) {
-	val filePaths = getAllVideoPaths(config).filter { it.isConverted() }
+	val filePaths = config.getAllVideoPaths().filter { it.isConverted() }
 
 	for (path in filePaths)
 		removeColorInfo(path)

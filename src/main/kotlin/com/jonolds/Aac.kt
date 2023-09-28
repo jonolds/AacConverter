@@ -1,13 +1,16 @@
 package com.jonolds
 
-import java.nio.file.Files
 import java.nio.file.Path
-import java.util.*
 
 
 fun main(args: Array<String>) {
 
+	checkForHelp(args)
+
 	val config = parseArgs(args)
+
+//	test(config)
+//	return
 
 	if (config.defaultProcess)
 		defaultProcess(config)
@@ -20,6 +23,16 @@ fun main(args: Array<String>) {
 
 }
 
+fun test(config: AacConfig) {
+
+	val paths = config.getAllVideoPaths()
+
+	for (path in paths)
+		trashVideo(path)
+
+
+}
+
 
 fun defaultProcess(config: AacConfig) {
 
@@ -28,8 +41,9 @@ fun defaultProcess(config: AacConfig) {
 	val filePaths = getFilePaths(config)
 
 	for (filePath in filePaths) {
-		ffmpegConversion(filePath, config)
-		removeColorInfo(filePath)
+		val newFilePath = ffmpegConversion(filePath, config)
+		trashVideo(filePath)
+		removeColorInfo(newFilePath)
 	}
 
 	println("\nDone with default process for ${filePaths.size} files in ${config.dirPath}.")
@@ -38,7 +52,7 @@ fun defaultProcess(config: AacConfig) {
 
 
 fun getFilePaths(config: AacConfig): List<Path> {
-	val allVideoPaths = getAllVideoPaths(config)
+	val allVideoPaths = config.getAllVideoPaths()
 
 	val (unconverted, converted) = allVideoPaths.partition { !it.isConverted() }
 		.let { it.first.toMutableList() to it.second }
@@ -57,23 +71,3 @@ fun getFilePaths(config: AacConfig): List<Path> {
 }
 
 
-
-fun Path.removeVideoExts(): String {
-	if (!isVideoFile())
-		return toString()
-	if (isConverted())
-		return toString().dropLast(8)
-	return toString().dropLast(4)
-}
-
-
-fun getAllVideoPaths(config: AacConfig): List<Path> =
-	Files.list(config.dirPath)?.filter { it.isVideoFile() }?.toList() ?: Collections.emptyList()
-
-fun Path.isVideoFile(): Boolean {
-	if (!toFile().isFile) return false
-	val fileType = toString().takeLast(3).lowercase()
-	return fileType == "mkv" || fileType == "mp4" || fileType == "avi"
-}
-
-fun Path.isConverted(): Boolean = toString().lowercase().endsWith(".aac.mkv")

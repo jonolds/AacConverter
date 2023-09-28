@@ -1,5 +1,7 @@
 package com.jonolds
 
+import java.net.URLDecoder
+import java.nio.file.Files
 import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -33,6 +35,13 @@ class AacConfig(
 
 
 	val defaultProcess get() = !removeSpaces && !fixColors
+
+
+	fun getAllVideoPaths(): List<Path> =
+		Files.list(dirPath)?.filter { it.isVideoFile() }?.toList() ?: Collections.emptyList()
+
+
+	val jarPath: String get() = URLDecoder.decode(this.javaClass.getProtectionDomain().codeSource.location.path, "UTF-8")
 
 }
 
