@@ -3,17 +3,10 @@ package com.jonolds
 import kotlin.system.exitProcess
 
 
-fun checkForHelp(args: Array<String>) {
-	val firstArg = args.firstOrNull() ?: return
-
-	if (firstArg != "--help" && firstArg != "-help")
-		return
-
+fun exitWithHelp(): Nothing {
 	println("\n$helpStr\n")
-
 	exitProcess(0)
 }
-
 
 val helpStr = """
 	=========================== AacConverter Help ============================
@@ -30,7 +23,6 @@ val helpStr = """
 			       debug - only convert first 30 seconds/additional output
 			   overwrite - overwrite already converted instead of skipping
 			   fixColors - remove color information after conversion (disables default)
-			removeSpaces - remove spaces in filenames before conversion (disables default)
 	
 	==========================================================================
 """.trimIndent()
