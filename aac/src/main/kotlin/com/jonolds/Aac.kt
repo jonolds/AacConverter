@@ -81,6 +81,34 @@ fun getJobs(): List<AacJob> {
 	return jobs
 }
 
+
+fun restore() {
+
+	val converted = getAllVideoPaths(config.workingDir)
+
+
+	val trashDirPath = config.workingDir.resolve("trash")
+	val restoredPaths = getAllVideoPaths(trashDirPath)
+		.map { Trash.restoreFromTrash(it) }
+
+	val restoredBaseFilenames = restoredPaths.map { it.fileName.removeVideoExts() }
+
+	val convertedToDelete = converted.filter { restoredBaseFilenames.contains(it.fileName.removeVideoExts()) }
+
+	for (fileToDelete in convertedToDelete)
+		fileToDelete.toFile().delete()
+
+	println("\nRestored:")
+	for (path in restoredPaths)
+		println("\t$path")
+
+	println("\nDeleted:")
+	for (path in convertedToDelete)
+		println("\t$path")
+
+	exitProcess(0)
+}
+
 const val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 val rando = Random(System.nanoTime())
@@ -109,4 +137,9 @@ fun CoroutineScope.handleSigint() {
 		coroutineContext.cancelChildren()
 		exitProcess(0)
 	}
+}
+
+fun exitWithMessage(msg: String) {
+	System.err.println(msg)
+	exitProcess(0)
 }

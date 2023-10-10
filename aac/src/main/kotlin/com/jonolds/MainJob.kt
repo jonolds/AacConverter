@@ -7,8 +7,7 @@ import kotlinx.coroutines.*
 class MainJob(
 	val jobs: List<AacJob>
 ) {
-
-
+	
 	lateinit var systemPrint: SystemPrint
 
 	suspend fun start() {
@@ -24,7 +23,7 @@ class MainJob(
 					job.convertedPath = job.origPath.toAacPath()
 					Trash.trashVideo(job.origPath)
 					if (job.needsConverted)
-						MkvPropEdit.removeColorInfo(job.convertedPath!!, job.log)
+						MkvPropEdit.removeColorInfo(job)
 				}
 				else println("\n!!! exitCode=$exitCode")
 
@@ -62,7 +61,11 @@ class MainJob(
 					"         audio codec = ${job.audioCodec}",
 					"   frames to convert = ${job.totalFrames}",
 					" duration to convert = ${job.totalDuration}",
-					"     needs converted = ${job.needsConverted}"
+					"     needs converted = ${job.needsConverted}",
+					"     audio languages = ${job.audioLangs}",
+					"        audio filter = ${job.audioFilter}",
+					"  subtitle languages = ${job.subtitleLangs}",
+					"     subtitle filter = ${job.subtitleFilter}",
 				)
 
 				job.log.appendLines(lines)
@@ -75,5 +78,7 @@ class MainJob(
 suspend fun getMainJob(): MainJob {
 	VideoFilenames.cleanup()
 	val jobs = getJobs()
+	if (jobs.isEmpty())
+		exitWithMessage("No video files to convert in ${config.workingDir}.")
 	return MainJob(jobs)
 }

@@ -6,25 +6,26 @@ import java.util.*
 
 
 fun getAllVideoPaths(path: Path): List<Path> {
+
 	val file = path.toFile()
 	if (!file.exists())
 		return Collections.emptyList()
 	if (!file.isDirectory)
 		throw NotDirectoryException("path= $path")
-	return Files.list(path)?.filter { it.isVideoFile() }?.toList().orEmpty()
+
+
+	return Files.list(path)
+		.filter { it.toFile().isFile }
+		?.filter { it.isVideoFile() }
+		?.toList().orEmpty()
 }
 
 
 fun ByteArray.toString(indices: IntRange): String = String(sliceArray(indices))
 
 fun ByteArray.startsWith(other: ByteArray): Boolean {
-	if (other.size > size)
-		return false
-
-	for (i in other.indices)
-		if (this[i] != other[i])
-			return false
-	return true
+	if (other.size > size) return false
+	return Arrays.equals(this, 0, other.size, other, 0, other.size)
 }
 
 
@@ -48,17 +49,18 @@ fun String.hasVideoExt(): Boolean =
 fun Path.isConverted(): Boolean = toString().lowercase().endsWith(".aac.mkv")
 
 fun Path.isVideoFile(): Boolean {
-	if (!toFile().isFile) return false
+	if (!toFile().isFile)
+		return false
+
 	return toString().hasVideoExt()
 }
 
 fun Path.removeVideoExts(): String {
-	if (!isVideoFile())
-		return toString()
 
 	var currentName = this.toString()
-	while (currentName.hasVideoExt() || currentName.lowercase().endsWith(".aac"))
+	while (currentName.hasVideoExt() || currentName.lowercase().endsWith(".aac")) {
 		currentName = currentName.dropLast(4)
+	}
 	return currentName
 }
 

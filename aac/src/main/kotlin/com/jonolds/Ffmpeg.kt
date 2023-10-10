@@ -2,15 +2,10 @@
 
 package com.jonolds
 
-import java.io.File
-import java.io.OutputStream
 import java.nio.file.Path
-import kotlin.system.exitProcess
 
 
 object Ffmpeg {
-
-	private val ffmpegHeader = "\n\n\n  *****  Ffmpeg  *****\n\n".toByteArray()
 
 	fun aacConversion(job: AacJob): Int {
 
@@ -18,12 +13,9 @@ object Ffmpeg {
 
 		newFilePath.toFile().delete()
 
-		val command = getFfmpegCommand(job.origPath, newFilePath, job.audioCodec, job.audioFilters, job.subtitleFilters)
+		val command = getFfmpegCommand(job.origPath, newFilePath, job.audioCodec, job.audioFilter, job.subtitleFilter)
 
-		val os = Special(job)
-
-		job.log.appendBytes(ffmpegHeader)
-
+		val os = FfmpegFileOutputStream(job)
 
 		val exitCode = ProcessRunner.run(command, os)
 
@@ -31,8 +23,6 @@ object Ffmpeg {
 			job.convertedFrames = job.totalFrames
 
 		os.close()
-
-//		println("\n\tDone converting ${job.origPath.fileName} with ffmpeg.  exit code=$exitCode")
 
 		return exitCode
 

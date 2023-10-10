@@ -4,12 +4,13 @@ package com.jonolds
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import java.io.File
 import java.nio.file.Path
 import java.util.*
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
-val aacJobDispatcher = Dispatchers.Default.limitedParallelism(config.numThreads)
+val aacJobDispatcher by lazy { Dispatchers.IO.limitedParallelism(config.numThreads) }
 
 class AacJob(
 	var origPath: Path,
@@ -26,13 +27,14 @@ class AacJob(
 	var audioLangs: List<String?> = emptyList()
 	var subtitleLangs: List<String?> = emptyList()
 
-	val audioFilters: String get() = if (audioLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else ""
+	val audioFilter: String get() = if (audioLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else ""
 
-	val subtitleFilters: String get() = if (subtitleLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else ""
+	val subtitleFilter: String get() = if (subtitleLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else ""
 
 	val needsConverted get() = audioCodec != "aac"
 
 	var convertedFrames = 0
+	var convertedTime = "00:00:00.00"
 	var speed = 0.0
 
 	val pctComplete get() = convertedFrames.toDouble()/totalFrames
@@ -40,7 +42,12 @@ class AacJob(
 	var jobStatusCode: StatusCode = StatusCode.NOT_STARTED
 	var jobMessage: String = ""
 
-	val log: FileWithChannel by lazy { fileWithChannel(config.logDir.resolve("log$jobNum.txt"), true) }
+	val log: File by lazy {
+		config.logDir.resolve("log$jobNum.txt").let { path ->
+			path.toFile().delete()
+			path.toFile().also { it.createNewFile() }
+		}
+	}
 
 	override fun compareTo(other: AacJob): Int = Arrays.compare(episode, other.episode)
 

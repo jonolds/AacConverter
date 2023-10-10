@@ -2,10 +2,7 @@ package com.jonolds
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainScope
-import java.io.File
 import java.net.URLDecoder
-import java.nio.file.CopyOption
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -51,11 +48,17 @@ object Trash {
 
 	fun restoreFromTrash(path: Path): Path {
 		val trashFileName = path.fileName.toString()
-		if (!trashFileName.endsWith(".old") || path.parent.last().toString() != "trash")
+		val trashDirPath = path.parent
+
+		if (!trashFileName.endsWith(".old") || trashDirPath.last().toString() != "trash")
 			throw IllegalArgumentException("Path is not trash.  path= $path")
 
 		val newPath = path.parent.parent.resolve(trashFileName.removeSuffix(".old"))
 		Files.move(path, newPath, StandardCopyOption.REPLACE_EXISTING)
+
+		if (trashDirPath.toFile().list()!!.isEmpty())
+			trashDirPath.toFile().delete()
+
 		return newPath
 	}
 

@@ -30,6 +30,7 @@ object ArgsParser {
 				argNormal.startsWith("numthreads") -> config.numThreads = argNormal.firstInt()
 				argNormal == "fixcolors" -> config.fixColors = true
 				argNormal == "overwrite" -> config.overwrite = true
+				argNormal == "restore" -> restore()
 				argNormal == "probeaudio" -> config.probeAudio = true
 				argNormal == "quiet" || argNormal == "q" -> config.quiet = true
 				argNormal == "test" -> test = true

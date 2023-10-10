@@ -28,22 +28,8 @@ object Ffprobe {
 		return frames?.ifBlank { "0" }?.toInt()
 	}
 
-	private suspend fun getAudioLanguages(path: Path): List<String?> {
-		val command =  "ffprobe \"$path\" -show_entries stream=index:stream_tags=language -select_streams a -v 0 -of compact=p=0:nk=0"
-		val list = ProcessRunner.execForMultiResult(command)
-
-			?.map { idxLang ->
-				val split = idxLang.split("|")
-				if (split.size == 1) null
-				else split[1]
-			}
-		Log.d("audioLangs= $list   ${path.fileName}")
-		return list.orEmpty()
-	}
-
-
 	private suspend fun getLanguagesForStreamType(path: Path, streamType: Char): List<String?> {
-		val command =  "ffprobe \"$path\" -show_entries stream=index:stream_tags=language -select_streams $streamType -v 0 -of compact=p=0:nk=0"
+		val command =  "ffprobe \"$path\" -show_entries stream=index:stream_tags=language -select_streams $streamType -v 0 -of compact=p=0:nk=1"
 		val list = ProcessRunner.execForMultiResult(command)
 			?.map { idxLang -> idxLang.split("|").getOrNull(1) }
 		Log.d("streamType=$streamType langs= $list   ${path.fileName}")
