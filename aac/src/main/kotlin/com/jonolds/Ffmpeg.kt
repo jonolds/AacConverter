@@ -13,7 +13,7 @@ object Ffmpeg {
 
 		newFilePath.toFile().delete()
 
-		val command = getFfmpegCommand(job.origPath, newFilePath, job.audioCodec, job.audioFilter, job.subtitleFilter)
+		val command = getFfmpegCommand(job, newFilePath)
 
 		val os = FfmpegFileOutputStream(job)
 
@@ -30,28 +30,30 @@ object Ffmpeg {
 
 
 	private fun getFfmpegCommand(
-		path: Path, convertedPath: Path,
-		audioCodec: String? = null,
-		audioFilters: String,
-		subtitleFilters: String,
+		job: AacJob,
+		convertedPath: Path,
 	): List<String> =
 		listOfNotNull(
-//			"ffmpeg",
 			"ffmpeg -hide_banner",
-	//		" -loglevel warning -stats",
-			"-i \"$path\"",
+			"-i ${quoted(job.origPath)}",
 			timeMapping,
 			"-map 0:v -c:v copy",
-			audioMappings(audioCodec, audioFilters),
-			"-map 0:s$subtitleFilters -c:s copy",
-			"\"$convertedPath\""
+			audioMapping(job),
+			getSubtitleMapping(job),
+			quoted(convertedPath)
 	)
 
 	private val timeMapping: String? get() = config.timeReqStr?.let { "-t $it" }
 
 
-	private fun audioMappings(audioCodec: String?, audioFilters: String) =
-		if (audioCodec == "aac") "-map 0:a$audioFilters -c:a copy"
-		else "-map 0:a$audioFilters -c:a aac -b:a 512k"
+	private fun audioMapping(job: AacJob): String {
+		val audioFilters = if (job.audioLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else ""
+		return if (job.audioCodec == "aac" || config.copyAudio) "-map 0:a$audioFilters -c:a copy"
+			else "-map 0:a$audioFilters -c:a aac -b:a 512k"
+	}
 
+	private fun getSubtitleMapping(job: AacJob): String {
+		val subtitleFilter = if (job.subtitleLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else ""
+		return "-map 0:s$subtitleFilter -c:s copy"
+	}
 }

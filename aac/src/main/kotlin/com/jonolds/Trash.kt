@@ -62,5 +62,11 @@ object Trash {
 		return newPath
 	}
 
+	fun restoreAllTrashForPath(workingPath: Path) {
+		for (trashPath in getAllVideoPaths(workingPath.resolve("trash")))
+			restoreFromTrash(trashPath)
+
+	}
+
 
 }

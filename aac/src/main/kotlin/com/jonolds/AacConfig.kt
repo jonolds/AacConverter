@@ -15,13 +15,15 @@ object AacConfig {
 
 	var overwrite = false
 
-	var fixColors = false
+	var noColorFix = false
 
 	var probeAudio = false
 
 	var quiet = false
 
 	var numThreads = 4
+
+	var copyAudio = false
 
 	var timeCnts: IntArray? = null
 		set(value) {
@@ -32,9 +34,6 @@ object AacConfig {
 	val timeReqStr: String? by lazy { timeCnts?.joinToString(":") { it.toString().padStart(2, '0') } }
 
 	val timeReqSecs: Float? by lazy { timeCnts?.let { tc -> 3600*tc[0] + 60*tc[1] + tc[2].toFloat() } }
-
-
-	val defaultProcess get() = !fixColors && !probeAudio
 
 
 	val logDir: Path by lazy { Files.createDirectories(binDir.resolve("logs")) }

@@ -21,6 +21,8 @@ fun getAllVideoPaths(path: Path): List<Path> {
 }
 
 
+fun quoted(value: Any): String = "\"$value\""
+
 fun ByteArray.toString(indices: IntRange): String = String(sliceArray(indices))
 
 fun ByteArray.startsWith(other: ByteArray): Boolean {

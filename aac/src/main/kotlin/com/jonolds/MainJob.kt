@@ -2,13 +2,18 @@
 
 package com.jonolds
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class MainJob(
 	val jobs: List<AacJob>
 ) {
-	
-	lateinit var systemPrint: SystemPrint
+
+	lateinit var mainLogControl: MainLogControl
+
 
 	suspend fun start() {
 
@@ -22,7 +27,7 @@ class MainJob(
 				if (exitCode == 0) {
 					job.convertedPath = job.origPath.toAacPath()
 					Trash.trashVideo(job.origPath)
-					if (job.needsConverted)
+					if (job.needsConverted && !config.noColorFix)
 						MkvPropEdit.removeColorInfo(job)
 				}
 				else println("\n!!! exitCode=$exitCode")
@@ -30,48 +35,29 @@ class MainJob(
 			}
 		}
 
-		systemPrint = SystemPrint(this, tasks)
+		mainLogControl = MainLogControl(this, tasks)
 
-
-		val printTask = systemPrint.start()
+		val mainLogTask = mainLogControl.start()
 
 		tasks.awaitAll()
 
-		printTask.await()
+		mainLogTask.await()
 
 		println("\nDone with default process for ${jobs.size} files in ${config.workingDir}.")
 
 	}
 
 
-
 	suspend fun probeVideoSpecs() {
 		jobs.map { job ->
 			mainScope.async(Dispatchers.IO) {
-
 				Ffprobe.probeVideoSpecs(job)
-
-				val lines = listOf(
-					"=".repeat(100),
-					"job_num=${job.jobNum}\n\n",
-					"            filename = ${job.origPath.fileName}",
-					"             episode = ${job.episode?.toEpisodeStr()}",
-					"                path = ${job.origPath}",
-					"         output path = ${job.origPath.toAacPath()}",
-					"         audio codec = ${job.audioCodec}",
-					"   frames to convert = ${job.totalFrames}",
-					" duration to convert = ${job.totalDuration}",
-					"     needs converted = ${job.needsConverted}",
-					"     audio languages = ${job.audioLangs}",
-					"        audio filter = ${job.audioFilter}",
-					"  subtitle languages = ${job.subtitleLangs}",
-					"     subtitle filter = ${job.subtitleFilter}",
-				)
-
-				job.log.appendLines(lines)
+				job.log.appendText(job.buildJobHeader())
 			}
 		}.awaitAll()
 	}
+
+
 }
 
 
@@ -82,3 +68,9 @@ suspend fun getMainJob(): MainJob {
 		exitWithMessage("No video files to convert in ${config.workingDir}.")
 	return MainJob(jobs)
 }
+
+val datetimeFormatter: DateTimeFormatter = DateTimeFormatter
+	.ofPattern("yyyy-MM-dd'T'hh:mm:ss")
+fun getTimestamp() = LocalDateTime.now()
+	.format(datetimeFormatter)
+	.toString()

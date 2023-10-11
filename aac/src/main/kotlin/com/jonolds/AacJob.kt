@@ -27,10 +27,6 @@ class AacJob(
 	var audioLangs: List<String?> = emptyList()
 	var subtitleLangs: List<String?> = emptyList()
 
-	val audioFilter: String get() = if (audioLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else ""
-
-	val subtitleFilter: String get() = if (subtitleLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else ""
-
 	val needsConverted get() = audioCodec != "aac"
 
 	var convertedFrames = 0
@@ -49,8 +45,24 @@ class AacJob(
 		}
 	}
 
-	override fun compareTo(other: AacJob): Int = Arrays.compare(episode, other.episode)
 
+	fun buildJobHeader(): String = StringBuilder("\n")
+		.appendLine("=".repeat(100))
+		.appendLine("job_num=${jobNum}\n\n")
+		.append("filename = ".padStart(23, ' ')).appendLine(origPath.fileName)
+		.append("episode = ".padStart(23, ' ')).appendLine(episode?.toEpisodeStr())
+		.append("path = ".padStart(23, ' ')).appendLine(origPath)
+		.append("output path = ".padStart(23, ' ')).appendLine(origPath.toAacPath())
+		.append("audio codec = ".padStart(23, ' ')).appendLine(audioCodec)
+		.append("frames to convert = ".padStart(23, ' ')).appendLine(totalFrames)
+		.append("duration to convert = ".padStart(23, ' ')).appendLine(totalDuration)
+		.append("needs converted = ".padStart(23, ' ')).appendLine(needsConverted)
+		.append("audio languages = ".padStart(23, ' ')).appendLine(audioLangs)
+		.append("subtitle languages = ".padStart(23, ' ')).appendLine(subtitleLangs)
+		.toString()
+
+
+	override fun compareTo(other: AacJob): Int = Arrays.compare(episode, other.episode)
 
 }
 

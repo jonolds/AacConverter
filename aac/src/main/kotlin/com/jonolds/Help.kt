@@ -22,7 +22,7 @@ val helpStr = """
 		Options:
 			       debug - only convert first 30 seconds/additional output
 			   overwrite - overwrite already converted instead of skipping
-			   fixColors - remove color information after conversion (disables default)
+			   noColorFix - remove color information after conversion (disables default)
 	
 	==========================================================================
 """.trimIndent()
