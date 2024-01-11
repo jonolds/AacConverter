@@ -20,7 +20,7 @@ class SystemPrint(
 ) {
 
 	private val filenameLen = jobs.map { it.origPath.fileName.toString() }.maxOf { it.length }
-	
+
 	fun updateOutput() {
 		val sb = StringBuilder(Cursor.prevStartCmd(jobs.size))
 		for (job in jobs) {

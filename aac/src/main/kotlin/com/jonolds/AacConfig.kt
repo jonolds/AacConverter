@@ -25,6 +25,7 @@ object AacConfig {
 
 	var copyAudio = false
 
+
 	var timeCnts: IntArray? = null
 		set(value) {
 			field = if (value?.sum() == 0) null
