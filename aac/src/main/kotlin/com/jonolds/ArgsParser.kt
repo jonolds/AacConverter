@@ -27,13 +27,14 @@ object ArgsParser {
 				argNormal == "help" -> exitWithHelp()
 				argNormal == "exit" -> exitProcess(0)
 				argNormal == "debug" -> Log.debug = true
-				argNormal.startsWith("numthreads") -> config.numThreads = argNormal.firstInt()
+				argNormal.startsWith("threads") -> config.numThreads = argNormal.firstInt()
 				argNormal == "nocolorfix" -> config.noColorFix = true
 				argNormal == "overwrite" -> config.overwrite = true
 				argNormal == "restore" -> restore()
 				argNormal == "probeaudio" -> config.probeAudio = true
 				argNormal == "quiet" || argNormal == "q" -> config.quiet = true
 				argNormal == "test" -> test = true
+				argNormal == "verbose" || argNormal == "v" -> Log.debug = true
 				argNormal == "copyaudio" -> config.copyAudio = true
 				argNormal.startsWith("t=") -> parseTimeArg(argNormal)
 				else -> throw IllegalArgumentException("IllegalArgumentException: '$arg' is unknown")

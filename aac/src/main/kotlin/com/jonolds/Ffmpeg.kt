@@ -53,7 +53,7 @@ object Ffmpeg {
 	}
 
 	private fun getSubtitleMapping(job: AacJob): String {
-		val subtitleFilter = if (job.subtitleLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else ""
+		val subtitleFilter = if (job.subtitleLangs.any { it?.lowercase() == "eng" }) ":m:language:eng" else "?"
 		return "-map 0:s$subtitleFilter -c:s copy"
 	}
 }

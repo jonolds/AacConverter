@@ -21,7 +21,7 @@ object AacConfig {
 
 	var quiet = false
 
-	var numThreads = 4
+	var numThreads = 8
 
 	var copyAudio = false
 
